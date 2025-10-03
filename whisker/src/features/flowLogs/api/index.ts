@@ -5,12 +5,11 @@ import {
     FlowLog as ApiFlowLog,
     QueryPage,
 } from '@/types/api';
-import { FlowLog, UniqueFlowLogs } from '@/types/render';
+import { FilterHintValues, FlowLog, UniqueFlowLogs } from '@/types/render';
 import {
     FilterHintKey,
     FilterHintType,
     FilterHintTypes,
-    FilterKey,
     OmniFilterProperties,
     transformToFlowsFilterQuery,
     transformToQueryPage,
@@ -22,6 +21,7 @@ import {
     getTimeInSeconds,
     handleDuplicateFlowLogs,
     transformFlowLogsResponse,
+    transformStartTime,
 } from '../utils';
 
 const getFlowLogs = (queryParams?: Record<string, string>) =>
@@ -79,17 +79,17 @@ export const useInfiniteFilterQuery = (
         enabled: query !== null,
     });
 
-const STREAM_TIME_OFFSET = -60;
-
 export const useFlowLogsStream = (
-    filterValues: Partial<Record<FilterKey, string[]>>,
+    startTime: number,
+    filterHintValues: Partial<FilterHintValues>,
 ) => {
     const initialStreamStartTime = React.useRef<number | null>(null);
     const restartTime = React.useRef<number | null>(null);
     const filters = transformToFlowsFilterQuery(
-        filterValues as Record<FilterKey, string[]>,
+        filterHintValues as FilterHintValues,
     );
-    const path = buildStreamPath(STREAM_TIME_OFFSET, filters);
+    const startTimeGte = transformStartTime(startTime);
+    const path = buildStreamPath(startTimeGte, filters);
     const uniqueFlowLogs = React.useRef<UniqueFlowLogs>({
         startTime: 0,
         flowLogs: [],
@@ -132,24 +132,33 @@ export const useFlowLogsStream = (
         }
     }, [totalItems]);
 
+    const updateStream = React.useCallback(
+        (path: string) => {
+            startStream({
+                path,
+                isUpdate: true,
+            });
+        },
+        [startStream],
+    );
+
     useDidUpdate(() => {
         const startTimeGte = getTimeInSeconds(initialStreamStartTime.current);
-        const path = buildStreamPath(
-            startTimeGte ?? STREAM_TIME_OFFSET,
-            filters,
-        );
-        startStream({
-            path,
-            isUpdate: true,
-        });
-    }, [filters]);
+        const path = buildStreamPath(startTimeGte, filters);
+        updateStream(path);
+    }, [filters, updateStream]);
+
+    useDidUpdate(
+        () => updateStream(buildStreamPath(startTimeGte, filters)),
+        [startTime, updateStream],
+    );
 
     const start = () => {
         const path = buildStreamPath(
             getTimeInSeconds(restartTime.current),
             filters,
         );
-        console.log({ restartTime: restartTime.current });
+
         startStream({ path });
     };
 

@@ -2,8 +2,8 @@ import { objToQueryStr } from '@/libs/tigera/ui-components/utils';
 import { FlowLog as ApiFlowLog } from '@/types/api';
 import { FlowLog, UniqueFlowLogs } from '@/types/render';
 import { v4 as uuid } from 'uuid';
-import { ColumnName } from '../components/FlowLogsList/flowLogsTable';
 import { VisibleColumns } from '../components/FlowLogsList';
+import { ColumnName } from '../components/FlowLogsList/flowLogsTable';
 
 export const transformFlowLogsResponse = ({
     start_time,
@@ -132,3 +132,5 @@ export const getV2Columns = (
 
     return parsedItem;
 };
+
+export const transformStartTime = (startTime: number) => startTime * -60;

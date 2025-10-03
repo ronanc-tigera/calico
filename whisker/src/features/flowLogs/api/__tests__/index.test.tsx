@@ -110,7 +110,7 @@ describe('useFlowLogsStream', () => {
         jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
 
         const { rerender } = renderHook(
-            ({ params }) => useFlowLogsStream(params),
+            ({ params }) => useFlowLogsStream(15, params),
             {
                 initialProps: {
                     source_name: [],
@@ -136,7 +136,7 @@ describe('useFlowLogsStream', () => {
         } as any);
         jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
 
-        const { result } = renderHook(() => useFlowLogsStream({}));
+        const { result } = renderHook(() => useFlowLogsStream(15, {}));
 
         result.current.startStream();
 
