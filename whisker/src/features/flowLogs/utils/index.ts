@@ -134,3 +134,16 @@ export const getV2Columns = (
 };
 
 export const transformStartTime = (startTime: number) => startTime * -60;
+
+export const updateFirstFlowStartTime = (
+    data: FlowLog[],
+    filterFlowStartTime: number | null,
+    setFirstFlowStartTime: (startTime: number | null) => void,
+) => {
+    if (filterFlowStartTime === null && data.length > 0) {
+        const sorted = data.sort(
+            (a, b) => b.start_time.getTime() - a.start_time.getTime(),
+        );
+        setFirstFlowStartTime(sorted[data.length - 1].start_time.getTime());
+    }
+};

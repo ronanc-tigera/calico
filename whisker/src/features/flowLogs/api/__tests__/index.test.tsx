@@ -144,4 +144,35 @@ describe('useFlowLogsStream', () => {
             path: `flows?watch=true&startTimeGte=${Math.round(startTime.getTime() / 1000)}`,
         });
     });
+
+    it('should reset firstFlowStartTime and update stream when startTime changes', () => {
+        const startStreamMock = jest.fn();
+        jest.mocked(useStream).mockReturnValue({
+            startStream: startStreamMock,
+            data: [{ start_time: startTime, end_time: endTime }],
+        } as any);
+        jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
+
+        const { rerender } = renderHook(
+            ({ startTime, filters }) => useFlowLogsStream(startTime, filters),
+            {
+                initialProps: {
+                    startTime: 15,
+                    filters: { source_name: [] } as any,
+                },
+            },
+        );
+
+        // Change the startTime parameter
+        rerender({
+            startTime: 30,
+            filters: { source_name: [] } as any,
+        });
+
+        // Should call updateStream with the new startTime (30 minutes = -1800 seconds)
+        expect(startStreamMock).toHaveBeenCalledWith({
+            isUpdate: true,
+            path: `flows?watch=true&startTimeGte=-1800`,
+        });
+    });
 });

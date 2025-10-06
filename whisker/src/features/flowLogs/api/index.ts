@@ -22,6 +22,7 @@ import {
     handleDuplicateFlowLogs,
     transformFlowLogsResponse,
     transformStartTime,
+    updateFirstFlowStartTime,
 } from '../utils';
 
 const getFlowLogs = (queryParams?: Record<string, string>) =>
@@ -83,7 +84,7 @@ export const useFlowLogsStream = (
     startTime: number,
     filterHintValues: Partial<FilterHintValues>,
 ) => {
-    const initialStreamStartTime = React.useRef<number | null>(null);
+    const firstFlowStartTime = React.useRef<number | null>(null);
     const restartTime = React.useRef<number | null>(null);
     const filters = transformToFlowsFilterQuery(
         filterHintValues as FilterHintValues,
@@ -119,13 +120,13 @@ export const useFlowLogsStream = (
 
     // First flow start time is needed for accurate filtering
     React.useEffect(() => {
-        if (initialStreamStartTime.current === null && data.length > 0) {
-            const sorted = data.sort(
-                (a, b) => b.start_time.getTime() - a.start_time.getTime(),
-            );
-            initialStreamStartTime.current =
-                sorted[data.length - 1].start_time.getTime();
-        }
+        updateFirstFlowStartTime(
+            data,
+            firstFlowStartTime.current,
+            (startTime) => {
+                firstFlowStartTime.current = startTime;
+            },
+        );
 
         if (data.length > 0) {
             restartTime.current = data[0].end_time.getTime();
@@ -143,15 +144,18 @@ export const useFlowLogsStream = (
     );
 
     useDidUpdate(() => {
-        const startTimeGte = getTimeInSeconds(initialStreamStartTime.current);
-        const path = buildStreamPath(startTimeGte, filters);
+        const path = buildStreamPath(
+            getTimeInSeconds(firstFlowStartTime.current),
+            filters,
+        );
         updateStream(path);
     }, [filters, updateStream]);
 
-    useDidUpdate(
-        () => updateStream(buildStreamPath(startTimeGte, filters)),
-        [startTime, updateStream],
-    );
+    useDidUpdate(() => {
+        // set first flow start time to null when the start time filter changes. It will be set to the first flow start time when the stream starts again.
+        firstFlowStartTime.current = null;
+        updateStream(buildStreamPath(startTimeGte, filters));
+    }, [startTime, updateStream]);
 
     const start = () => {
         const path = buildStreamPath(
