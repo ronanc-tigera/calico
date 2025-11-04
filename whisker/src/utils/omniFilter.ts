@@ -236,6 +236,11 @@ export type OmniFilterPropertiesType = Record<
 
 const requestPageSize = 20;
 
+const reporterLabels = {
+    src: 'Source',
+    dst: 'Destination',
+};
+
 export const OmniFilterProperties: OmniFilterPropertiesType = {
     source_namespace: {
         label: 'Source Namespace',
@@ -288,8 +293,8 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
         transformToFilterSearchRequest: transformToListFilterSearchRequest,
         filterComponentProps: {
             filters: [
-                { label: 'src', value: 'src' },
-                { label: 'dst', value: 'dst' },
+                { label: reporterLabels.src, value: 'src' },
+                { label: reporterLabels.dst, value: 'dst' },
             ],
             listType: 'radio',
             showSearch: false,
@@ -297,6 +302,15 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
             width: '100px',
             popoverContentProps: {
                 width: '175px',
+            },
+            formatSelectedLabel: (selectedFilters) => {
+                const [selectedFilter] = selectedFilters;
+
+                return selectedFilter
+                    ? reporterLabels[
+                          selectedFilter.value as keyof typeof reporterLabels
+                      ]
+                    : '';
             },
         },
     },
