@@ -11,7 +11,7 @@ import {
     QueryPage,
     FlowsFilterValue,
 } from '@/types/api';
-import { FilterHintValues } from '@/types/render';
+import { FilterHintValues, ReporterLabels } from '@/types/render';
 
 export enum FilterKey {
     // policy = 'policy',
@@ -236,11 +236,6 @@ export type OmniFilterPropertiesType = Record<
 
 const requestPageSize = 20;
 
-const reporterLabels = {
-    src: 'Source',
-    dst: 'Destination',
-};
-
 export const OmniFilterProperties: OmniFilterPropertiesType = {
     source_namespace: {
         label: 'Source Namespace',
@@ -293,8 +288,8 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
         transformToFilterSearchRequest: transformToListFilterSearchRequest,
         filterComponentProps: {
             filters: [
-                { label: reporterLabels.src, value: 'src' },
-                { label: reporterLabels.dst, value: 'dst' },
+                { label: ReporterLabels.src, value: 'src' },
+                { label: ReporterLabels.dst, value: 'dst' },
             ],
             listType: 'radio',
             showSearch: false,
@@ -307,8 +302,8 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
                 const [selectedFilter] = selectedFilters;
 
                 return selectedFilter
-                    ? reporterLabels[
-                          selectedFilter.value as keyof typeof reporterLabels
+                    ? ReporterLabels[
+                          selectedFilter.value as keyof typeof ReporterLabels
                       ]
                     : '';
             },
