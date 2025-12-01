@@ -6,9 +6,9 @@ import {
 } from '@/libs/tigera/ui-components/components/common/OmniFilter/parts';
 import { OmniFilterOption } from '@/libs/tigera/ui-components/components/common/OmniFilter/types';
 import Select from '@/libs/tigera/ui-components/components/common/Select';
-
+import OmniFilterFooter from '@/features/flowLogs/components/OmniFilterFooter';
 import React from 'react';
-import OmniFilterFooter from '../../../OmniFilterFooter';
+import { SelectStyles } from '@/libs/tigera/ui-components/components/common/Select/styles';
 
 const testId = 'start-time';
 
@@ -18,10 +18,10 @@ type StartTimeFilterProps = {
     value: OmniFilterOption;
     isActive: boolean;
     options: OmniFilterOption[];
+    hasChanged: boolean;
     onChange: (value: OmniFilterOption) => void;
     onClick: () => void;
-    onClear: () => void;
-    onSubmit: () => void;
+    onReset: () => void;
 };
 
 const StartTimeFilter: React.FC<StartTimeFilterProps> = ({
@@ -30,10 +30,10 @@ const StartTimeFilter: React.FC<StartTimeFilterProps> = ({
     isActive,
     options,
     value,
+    hasChanged,
     onClick,
     onChange,
-    onClear,
-    onSubmit,
+    onReset,
 }) => (
     <OmniFilterContainer>
         {({ onClose }) => (
@@ -50,30 +50,55 @@ const StartTimeFilter: React.FC<StartTimeFilterProps> = ({
                 <OmniFilterContent data-testid={`${testId}-popover-content`}>
                     <OmniFilterBody
                         data-testid={`${testId}-popover-body`}
-                        py={4}
+                        p={0}
                     >
                         <Select
+                            menuIsOpen
+                            controlShouldRenderValue={false}
+                            hideSelectedOptions={false}
+                            autoFocus
+                            components={{
+                                DropdownIndicator: null,
+                                IndicatorSeparator: null,
+                                Control: () => null,
+                            }}
+                            backspaceRemovesValue={false}
+                            tabSelectsValue={false}
                             options={options}
                             isSearchable={false}
                             isClearable={false}
                             value={value}
-                            onChange={onChange}
+                            onChange={(newValue) => {
+                                onChange(newValue);
+                                onClose();
+                            }}
+                            sx={{
+                                menu: (styles) => ({
+                                    ...styles,
+                                    ...SelectStyles.menu,
+                                    position: 'relative',
+                                    my: 0,
+                                }),
+                                option: (styles) => ({
+                                    ...styles,
+                                    ...SelectStyles.option,
+                                    _dark: {
+                                        ...SelectStyles.option._dark,
+                                        background: 'tigeraGrey.1000',
+                                    },
+                                }),
+                            }}
                         />
                     </OmniFilterBody>
-
                     <OmniFilterFooter
                         testId={testId}
-                        clearButtonProps={{
+                        leftButtonProps={{
                             onClick: () => {
-                                onClear();
+                                onReset();
                                 onClose();
                             },
-                        }}
-                        submitButtonProps={{
-                            onClick: () => {
-                                onSubmit();
-                                onClose();
-                            },
+                            children: 'Reset filter',
+                            isDisabled: !hasChanged,
                         }}
                     />
                 </OmniFilterContent>

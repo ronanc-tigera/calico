@@ -40,6 +40,7 @@ const Select: React.FC<React.PropsWithChildren<SelectType>> = forwardRef(
                 ref={ref}
                 isMulti={isMulti}
                 options={options}
+                selectedOptionStyle='check'
                 {...((hasIcons
                     ? {
                           formatOptionLabel: (e: any) => (

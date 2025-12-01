@@ -1,5 +1,47 @@
 import { ChakraStylesConfig } from 'chakra-react-select';
 
+export const SelectStyles = {
+    option: {
+        fontWeight: 400,
+        px: 2.5,
+        py: 2,
+        fontSize: 'sm',
+        minWidth: 'fit-content',
+        ':hover': {
+            bg: 'tigeraGrey.200',
+            color: 'tigeraBlack',
+        },
+
+        _dark: {
+            background: 'tigeraGreyDark.200',
+            _hover: {
+                bg: 'tigeraGrey.800',
+                color: 'tigeraWhite',
+            },
+            _selected: {
+                background: 'tigeraBlueMediumDark',
+                color: 'tigeraBlueMedium40',
+            },
+            _focus: {
+                backgroundColor: 'tigeraGrey.800',
+                _selected: {
+                    background: 'tigeraBlueMediumDark',
+                    color: 'tigeraBlueMedium40',
+                },
+            },
+        },
+    },
+    menu: {
+        mt: 1,
+        boxShadow: '0px 0px 8px #dcdde0 !important',
+        borderColor: 'tigeraGrey.300',
+        borderRadius: 'md',
+        _dark: {
+            boxShadow: 'none !important',
+        },
+    },
+};
+
 export default {
     control: (provided: any) => ({
         ...provided,
@@ -33,13 +75,7 @@ export default {
     }),
     menu: (provided: any) => ({
         ...provided,
-        mt: 1,
-        boxShadow: '0px 0px 8px #dcdde0 !important',
-        borderColor: 'tigeraGrey.300',
-        borderRadius: 'md',
-        _dark: {
-            boxShadow: 'none !important',
-        },
+        ...SelectStyles.menu,
     }),
     menuList: (provided: any) => ({
         ...provided,
@@ -55,30 +91,13 @@ export default {
         textAlign: 'left',
         px: 4,
     }),
-    option: (state: any) => ({
-        ...state,
-        fontWeight: 400,
-        px: 2.5,
-        py: 2,
-        fontSize: 'sm',
-        minWidth: 'fit-content',
-        ':hover': {
-            bg: 'tigeraGrey.200',
-            color: 'tigeraBlack',
-        },
-
-        _dark: {
-            background: 'tigeraGreyDark.200',
-            _hover: {
-                bg: 'tigeraGrey.800',
-                color: 'tigeraWhite',
-            },
-            _selected: {
-                background: 'tigeraBlueMediumDark',
-                color: 'tigeraBlueMedium40',
-            },
-        },
-    }),
+    option: (state: any, provided) => {
+        console.log({ state, provided });
+        return {
+            ...state,
+            ...SelectStyles.option,
+        };
+    },
     dropdownIndicator: (provided: any) => ({
         ...provided,
         bg: 'transparent',
