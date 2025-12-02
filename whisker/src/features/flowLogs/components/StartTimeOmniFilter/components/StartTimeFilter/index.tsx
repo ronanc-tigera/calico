@@ -1,3 +1,4 @@
+import OmniFilterFooter from '@/features/flowLogs/components/OmniFilterFooter';
 import {
     OmniFilterBody,
     OmniFilterContainer,
@@ -6,9 +7,10 @@ import {
 } from '@/libs/tigera/ui-components/components/common/OmniFilter/parts';
 import { OmniFilterOption } from '@/libs/tigera/ui-components/components/common/OmniFilter/types';
 import Select from '@/libs/tigera/ui-components/components/common/Select';
-import OmniFilterFooter from '@/features/flowLogs/components/OmniFilterFooter';
-import React from 'react';
+import HiddenControl from '@/libs/tigera/ui-components/components/common/Select/components/HiddenControl';
 import { SelectStyles } from '@/libs/tigera/ui-components/components/common/Select/styles';
+import React from 'react';
+import * as ReactSelect from 'chakra-react-select';
 
 const testId = 'start-time';
 
@@ -34,77 +36,89 @@ const StartTimeFilter: React.FC<StartTimeFilterProps> = ({
     onClick,
     onChange,
     onReset,
-}) => (
-    <OmniFilterContainer>
-        {({ onClose }) => (
-            <>
-                <OmniFilterTrigger
-                    label={filterLabel}
-                    testId={testId}
-                    selectedValueLabel={triggerLabel}
-                    onClick={() => {
-                        onClick();
-                    }}
-                    isActive={isActive}
-                />
-                <OmniFilterContent data-testid={`${testId}-popover-content`}>
-                    <OmniFilterBody
-                        data-testid={`${testId}-popover-body`}
-                        p={0}
+}) => {
+    const initialFocusRef = React.useRef<ReactSelect.SelectInstance>(null);
+
+    return (
+        <OmniFilterContainer initialFocusRef={initialFocusRef}>
+            {({ onClose }) => (
+                <>
+                    <OmniFilterTrigger
+                        label={filterLabel}
+                        testId={testId}
+                        selectedValueLabel={triggerLabel}
+                        onClick={() => {
+                            onClick();
+                        }}
+                        isActive={isActive}
+                    />
+                    <OmniFilterContent
+                        data-testid={`${testId}-popover-content`}
                     >
-                        <Select
-                            menuIsOpen
-                            controlShouldRenderValue={false}
-                            hideSelectedOptions={false}
-                            autoFocus
-                            components={{
-                                DropdownIndicator: null,
-                                IndicatorSeparator: null,
-                                Control: () => null,
-                            }}
-                            backspaceRemovesValue={false}
-                            tabSelectsValue={false}
-                            options={options}
-                            isSearchable={false}
-                            isClearable={false}
-                            value={value}
-                            onChange={(newValue) => {
-                                onChange(newValue);
-                                onClose();
-                            }}
-                            sx={{
-                                menu: (styles) => ({
-                                    ...styles,
-                                    ...SelectStyles.menu,
-                                    position: 'relative',
-                                    my: 0,
-                                }),
-                                option: (styles) => ({
-                                    ...styles,
-                                    ...SelectStyles.option,
-                                    _dark: {
-                                        ...SelectStyles.option._dark,
-                                        background: 'tigeraGrey.1000',
-                                    },
-                                }),
+                        <OmniFilterBody
+                            data-testid={`${testId}-popover-body`}
+                            px={0}
+                            py={2}
+                        >
+                            <Select
+                                options={options}
+                                ref={initialFocusRef}
+                                autoFocus
+                                backspaceRemovesValue={false}
+                                components={{
+                                    Control: HiddenControl,
+                                }}
+                                controlShouldRenderValue={false}
+                                hideSelectedOptions={false}
+                                isClearable={false}
+                                menuIsOpen
+                                onChange={(newValue) => {
+                                    onChange(newValue);
+                                    onClose();
+                                }}
+                                placeholder='Select a start time...'
+                                tabSelectsValue={false}
+                                value={value}
+                                sx={{
+                                    menu: (styles) => ({
+                                        ...styles,
+                                        ...SelectStyles.menu,
+                                        position: 'relative',
+                                        my: 0,
+                                        borderRadius: 0,
+                                    }),
+                                    menuList: (styles) => ({
+                                        ...styles,
+                                        ...SelectStyles.menuList,
+                                        borderRadius: 0,
+                                    }),
+                                    option: (styles) => ({
+                                        ...styles,
+                                        ...SelectStyles.option,
+                                        _dark: {
+                                            ...SelectStyles.option._dark,
+                                            background: 'tigeraGrey.1000',
+                                        },
+                                    }),
+                                }}
+                            />
+                        </OmniFilterBody>
+                        <OmniFilterFooter
+                            testId={testId}
+                            leftButtonProps={{
+                                onClick: () => {
+                                    onReset();
+                                    onClose();
+                                },
+                                children: 'Reset filter',
+                                isDisabled: !hasChanged,
                             }}
                         />
-                    </OmniFilterBody>
-                    <OmniFilterFooter
-                        testId={testId}
-                        leftButtonProps={{
-                            onClick: () => {
-                                onReset();
-                                onClose();
-                            },
-                            children: 'Reset filter',
-                            isDisabled: !hasChanged,
-                        }}
-                    />
-                </OmniFilterContent>
-            </>
-        )}
-    </OmniFilterContainer>
-);
+                    </OmniFilterContent>
+                </>
+            )}
+        </OmniFilterContainer>
+    );
+};
 
 export default StartTimeFilter;

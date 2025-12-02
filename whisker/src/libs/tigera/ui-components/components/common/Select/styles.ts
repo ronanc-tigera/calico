@@ -7,17 +7,9 @@ export const SelectStyles = {
         py: 2,
         fontSize: 'sm',
         minWidth: 'fit-content',
-        ':hover': {
-            bg: 'tigeraGrey.200',
-            color: 'tigeraBlack',
-        },
 
         _dark: {
             background: 'tigeraGreyDark.200',
-            _hover: {
-                bg: 'tigeraGrey.800',
-                color: 'tigeraWhite',
-            },
             _selected: {
                 background: 'tigeraBlueMediumDark',
                 color: 'tigeraBlueMedium40',
@@ -38,6 +30,14 @@ export const SelectStyles = {
         borderRadius: 'md',
         _dark: {
             boxShadow: 'none !important',
+        },
+    },
+    menuList: {
+        pt: 0,
+        pb: 0,
+        _dark: {
+            boxShadow: 'none',
+            border: 'none',
         },
     },
 };
@@ -79,25 +79,17 @@ export default {
     }),
     menuList: (provided: any) => ({
         ...provided,
-        pt: 0,
-        pb: 0,
-        _dark: {
-            boxShadow: 'none',
-            border: 'none',
-        },
+        ...SelectStyles.menuList,
     }),
     noOptionsMessage: (state: any) => ({
         ...state,
         textAlign: 'left',
         px: 4,
     }),
-    option: (state: any, provided) => {
-        console.log({ state, provided });
-        return {
-            ...state,
-            ...SelectStyles.option,
-        };
-    },
+    option: (state: any) => ({
+        ...state,
+        ...SelectStyles.option,
+    }),
     dropdownIndicator: (provided: any) => ({
         ...provided,
         bg: 'transparent',

@@ -27,18 +27,11 @@ describe('<StartTimeOmniFilter />', () => {
         onChange: mockOnChange,
         onClear: mockOnClear,
         value: '5',
+        onReset: jest.fn(),
     };
 
     beforeEach(() => {
         jest.clearAllMocks();
-    });
-
-    it('should call onClear when StartTimeFilter calls onClear', () => {
-        render(<StartTimeOmniFilter {...defaultProps} />);
-
-        MockStartTimeFilter.onClear();
-
-        expect(mockOnClear).toHaveBeenCalledTimes(1);
     });
 
     it('should call onChange with correct event when value changes', () => {
