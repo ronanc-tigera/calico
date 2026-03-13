@@ -23,6 +23,9 @@ import {
     Tooltip,
 } from './components';
 import SearchInput from '@/libs/tigera/ui-components/components/common/SearchInput/styles';
+import experimentalColors from './experimental-tokens/palette';
+import experimentalSemanticTokens from './experimental-tokens';
+import Accordion from './components/Accordion';
 
 const config: ThemeConfig = {
     initialColorMode: 'dark',
@@ -31,12 +34,21 @@ const config: ThemeConfig = {
 
 const theme = extendTheme({
     config,
-    colors,
-    semanticTokens,
+    colors: {
+        ...colors,
+        ...experimentalColors,
+    },
+    semanticTokens: {
+        colors: {
+            ...semanticTokens.colors,
+            ...experimentalSemanticTokens,
+        },
+    },
     styles: {
         global: () => global,
     },
     components: {
+        Accordion,
         Link,
         LogDetailsView,
         StatusIndicator,
