@@ -392,9 +392,7 @@ describe('OmniFilter', () => {
         fireEvent.click(screen.getByText(filters[0].label));
 
         expect(onChange).toHaveBeenCalled();
-        expect(
-            screen.queryByText(filters[1].label),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(filters[1].label)).not.toBeInTheDocument();
     });
 
     it('should keep the popover open after selecting a filter when listType is checkbox', () => {

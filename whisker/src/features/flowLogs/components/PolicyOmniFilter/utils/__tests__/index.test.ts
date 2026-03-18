@@ -167,7 +167,10 @@ describe('updateQueryField', () => {
 
     it('overwrites an existing field value', () => {
         const queries: QuerySelect[] = [{ kind: kindOption }];
-        const newKind = { label: 'GlobalNetworkPolicy', value: 'GlobalNetworkPolicy' };
+        const newKind = {
+            label: 'GlobalNetworkPolicy',
+            value: 'GlobalNetworkPolicy',
+        };
 
         expect(updateQueryField(queries, 0, 'kind', newKind)).toEqual([
             { kind: newKind },

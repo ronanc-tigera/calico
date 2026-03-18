@@ -24,56 +24,51 @@ jest.mock('@/hooks', () => ({
 }));
 
 let omniFilterProps: Record<string, any> = {};
-jest.mock(
-    '@/libs/tigera/ui-components/components/common/OmniFilter',
-    () => {
-        const component = (props: any) => {
-            omniFilterProps = props;
-            return (
-                <div data-testid='omni-filter'>
-                    <button
-                        data-testid='change-btn'
-                        onClick={() =>
-                            props.onChange({
-                                filterId: props.filterId,
-                                filterLabel: '',
-                                operator: undefined,
-                                filters: [
-                                    {
-                                        label: 'NetworkPolicy',
-                                        value: 'NetworkPolicy',
-                                    },
-                                ],
-                            })
-                        }
-                    />
-                    <button
-                        data-testid='clear-btn'
-                        onClick={() => props.onClear()}
-                    />
-                    <button
-                        data-testid='ready-btn'
-                        onClick={() => props.onReady?.()}
-                    />
-                    <button
-                        data-testid='search-btn'
-                        onClick={() =>
-                            props.onRequestSearch?.(props.filterId, 'net')
-                        }
-                    />
-                    <button
-                        data-testid='more-btn'
-                        onClick={() =>
-                            props.onRequestMore?.(props.filterId, '')
-                        }
-                    />
-                </div>
-            );
-        };
-        component.displayName = 'OmniFilter';
-        return { __esModule: true, default: component };
-    },
-);
+jest.mock('@/libs/tigera/ui-components/components/common/OmniFilter', () => {
+    const component = (props: any) => {
+        omniFilterProps = props;
+        return (
+            <div data-testid='omni-filter'>
+                <button
+                    data-testid='change-btn'
+                    onClick={() =>
+                        props.onChange({
+                            filterId: props.filterId,
+                            filterLabel: '',
+                            operator: undefined,
+                            filters: [
+                                {
+                                    label: 'NetworkPolicy',
+                                    value: 'NetworkPolicy',
+                                },
+                            ],
+                        })
+                    }
+                />
+                <button
+                    data-testid='clear-btn'
+                    onClick={() => props.onClear()}
+                />
+                <button
+                    data-testid='ready-btn'
+                    onClick={() => props.onReady?.()}
+                />
+                <button
+                    data-testid='search-btn'
+                    onClick={() =>
+                        props.onRequestSearch?.(props.filterId, 'net')
+                    }
+                />
+                <button
+                    data-testid='more-btn'
+                    onClick={() => props.onRequestMore?.(props.filterId, '')}
+                />
+            </div>
+        );
+    };
+    component.displayName = 'OmniFilter';
+    return { __esModule: true, default: component };
+});
 
 const defaultProps = {
     filterKey: FilterKey.policyKind as any,
@@ -181,7 +176,8 @@ describe('<PolicySelect />', () => {
         render(<PolicySelect {...defaultProps} value={null} />);
 
         expect(
-            omniFilterProps.partsProps.triggerProps.customContent.props.children,
+            omniFilterProps.partsProps.triggerProps.customContent.props
+                .children,
         ).toBe('Select...');
     });
 
@@ -190,7 +186,8 @@ describe('<PolicySelect />', () => {
         render(<PolicySelect {...defaultProps} value={value} />);
 
         expect(
-            omniFilterProps.partsProps.triggerProps.customContent.props.children,
+            omniFilterProps.partsProps.triggerProps.customContent.props
+                .children,
         ).toBe('NetworkPolicy');
     });
 

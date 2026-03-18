@@ -21,6 +21,7 @@ import {
     CheckboxListLoadingSkeleton,
     ReorderableCheckList,
     Tooltip,
+    Radio,
 } from './components';
 import SearchInput from '@/libs/tigera/ui-components/components/common/SearchInput/styles';
 import experimentalColors from './experimental-tokens/palette';
@@ -68,6 +69,7 @@ const theme = extendTheme({
         ReorderableCheckList,
         Tooltip,
         SearchInput,
+        Radio,
     },
     fontSizes: {
         xxs: '0.625rem',

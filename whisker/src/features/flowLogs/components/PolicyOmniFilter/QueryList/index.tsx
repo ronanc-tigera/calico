@@ -21,8 +21,7 @@ export type Query = {
     name: string;
 };
 
-const PolicyFilters = ['kind', 'tier', 'namespace', 'name'] as const;
-export type PolicyFilterKey = (typeof PolicyFilters)[number];
+export type PolicyFilterKey = 'kind' | 'tier' | 'namespace' | 'name';
 
 export type PolicyQuery = Partial<Record<PolicyFilterKey, SelectOption | null>>;
 

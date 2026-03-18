@@ -214,6 +214,10 @@ export const transformToFlowsFilterQuery = (
         : '';
 };
 
+export const transformToList = (filters: string[]) => [filters[0]];
+
+export const transformToSinlgeValue = (filters: string[]) => filters[0];
+
 export type FilterHintType =
     | 'SourceName'
     | 'DestName'
@@ -250,7 +254,12 @@ type OmniFilterProperty = {
     filterHintsKey: string;
     transformToFilterHintRequest?: (
         filters: any[],
-    ) => FlowsFilterQuery[] | Record<string, any>[] | undefined;
+    ) =>
+        | FlowsFilterQuery[]
+        | Record<string, any>[]
+        | string[]
+        | string
+        | undefined;
     transformToFilterSearchRequest?: (
         search: string,
     ) =>
@@ -314,9 +323,8 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
     },
     reporter: {
         label: 'Reporter',
-        filterHintsKey: 'reporters',
-        transformToFilterHintRequest: transformToListFilter,
-        transformToFilterSearchRequest: transformToListFilterSearchRequest,
+        filterHintsKey: 'reporter',
+        transformToFilterHintRequest: transformToSinlgeValue,
         filterComponentProps: {
             filters: [
                 { label: ReporterLabels.Src, value: 'Src' },
@@ -405,21 +413,20 @@ export const OmniFilterProperties: OmniFilterPropertiesType = {
     action: {
         label: 'Action',
         filterHintsKey: 'actions',
-        transformToFilterHintRequest: transformToListFilter,
-        transformToFilterSearchRequest: transformToListFilterSearchRequest,
+        transformToFilterHintRequest: transformToList,
         limit: requestPageSize,
     },
 
     staged_action: {
         label: 'Staged Action',
         filterHintsKey: 'staged_actions',
-        transformToFilterHintRequest: transformToListFilter,
+        transformToFilterHintRequest: transformToList,
     },
 
     pending_action: {
         label: 'Pending Action',
         filterHintsKey: 'pending_actions',
-        transformToFilterHintRequest: transformToListFilter,
+        transformToFilterHintRequest: transformToList,
     },
 };
 
