@@ -20,7 +20,6 @@ export type VirtualizedRowData = Omit<
     rows: Array<any>;
     shouldAnimate: (obj: any) => boolean;
     virtualizationRef: React.MutableRefObject<VariableSizeList<any> | null>;
-    isLast?: boolean;
 };
 
 type VirtualizedTableRowProps = {
@@ -39,7 +38,6 @@ const VirtualizedTableRow = ({
         onRowClicked,
         virtualizationRef,
         virtualisationProps,
-        isLast,
         ...rest
     },
 }: VirtualizedTableRowProps) => {

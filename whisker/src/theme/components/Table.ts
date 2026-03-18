@@ -5,7 +5,6 @@ const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
     tableAnatomy.keys,
 );
 
-/* eslint-disable sonarjs/no-duplicate-string */
 const defaultStyles = {
     table: {
         bg: 'experimental-token-bg-table-body',
