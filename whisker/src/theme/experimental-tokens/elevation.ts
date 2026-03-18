@@ -51,4 +51,8 @@ export default {
         _light: 'experimental-color-neutral.0',
         _dark: 'experimental-color-neutral.1100',
     },
+    'experimental-token-elevation-overlay-surface': {
+        _light: 'experimental-color-neutral.0',
+        _dark: 'experimental-color-neutral.1100',
+    },
 };

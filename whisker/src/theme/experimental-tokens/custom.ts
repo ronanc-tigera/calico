@@ -9,23 +9,27 @@ export default {
     // table
     'experimental-token-table-selected': {
         _light: 'experimental-token-bg-brand',
-        _dark: alpha('experimental-color-medium-gold.600', 0.35),
+        _dark: alpha('experimental-color-medium-blue.600', 0.4),
     },
     'experimental-token-table-selected:hovered': {
         _light: 'experimental-token-bg-brand:hovered',
-        _dark: alpha('experimental-color-medium-gold.700', 0.35),
+        _dark: alpha('experimental-color-medium-blue.500', 0.4),
     },
     'experimental-token-table-selected:pressed': {
         _light: 'experimental-token-bg-brand:pressed',
-        _dark: alpha('experimental-color-medium-gold.800', 0.35),
+        _dark: alpha('experimental-color-medium-blue.400', 0.4),
     },
     'experimental-token-bg-table-expanded': {
         _light: 'experimental-token-elevation-sunken',
-        _dark: 'experimental-token-elevation-sunken',
+        _dark: 'experimental-color-neutral.1100',
     },
     'experimental-token-bg-table-header': {
         _light: 'experimental-color-neutral.50',
         _dark: 'experimental-token-bg-neutral',
+    },
+    'experimental-token-bg-table-body': {
+        _light: 'experimental-color-neutral.50',
+        _dark: 'experimental-token-bg-empty',
     },
     'experimental-token-on-table-selected': {
         _light: 'experimental-token-fg-inverted',
