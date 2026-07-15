@@ -4,7 +4,7 @@ import {
 } from '@/libs/tigera/ui-components/components/common';
 import { VirtualizedRow } from '@/libs/tigera/ui-components/components/common/DataTable';
 import ReorderableCheckList from '@/libs/tigera/ui-components/components/common/ReorderableCheckList';
-import { ApiError } from '@/types/api';
+import { StreamError } from '@/api/sseStream';
 import { FlowLog } from '@/types/render';
 import React from 'react';
 import { CellProps } from 'react-table';
@@ -25,7 +25,7 @@ import { headerStyles, subRowStyles, tableStyles } from './styles';
 type FlowLogsListProps = {
     flowLogs: FlowLog[];
     isLoading?: boolean;
-    error?: ApiError | null;
+    error?: StreamError | null;
     onRowClicked: (row: VirtualizedRow) => void;
     onSortClicked: () => void;
     maxStartTime: number;

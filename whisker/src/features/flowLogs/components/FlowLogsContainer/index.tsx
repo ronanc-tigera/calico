@@ -1,5 +1,5 @@
 import { VirtualizedRow } from '@/libs/tigera/ui-components/components/common/DataTable';
-import { ApiError } from '@/types/api';
+import { StreamError } from '@/api/sseStream';
 import { FlowLog } from '@/types/render';
 import React from 'react';
 import FlowLogsList from '../FlowLogsList';
@@ -8,7 +8,7 @@ import { useFlowLogsHeightOffset } from '../../hooks';
 
 export type FlowLogsContainerProps = {
     flowLogs: FlowLog[];
-    error: ApiError | null;
+    error: StreamError | null;
     onRowClicked: (row: VirtualizedRow) => void;
     onSortClicked: () => void;
     isFetching: boolean;

@@ -60,46 +60,39 @@ const FlowLogsPage: React.FC = () => {
         return rest;
     }, [filters]);
 
-    const {
-        stopStream,
-        startStream,
-        isDataStreaming,
-        data,
-        error,
-        isWaiting,
-        hasStoppedStreaming,
-        isFetching,
-        totalItems,
-    } = useFlowLogsStream(startTime, filterHintValues);
+    const { pause, resume, status, data, error, totalItems, droppedCount } =
+        useFlowLogsStream(startTime, filterHintValues);
+
+    const isStreamActive =
+        status === 'connecting' ||
+        status === 'waiting' ||
+        status === 'streaming' ||
+        status === 'reconnecting';
+    const isFetching = status === 'connecting' && data.length === 0;
 
     const toast = useToast();
     const selectedRowIdRef = React.useRef<string | null>(null);
     const selectedRowRef = React.useRef<VirtualizedRow | null>(null);
-    const isWaitingRef = React.useRef<boolean>(false);
-    const hasStoppedRef = React.useRef<boolean>(false);
-    isWaitingRef.current = isWaiting;
-    hasStoppedRef.current = hasStoppedStreaming;
 
     const maxStartTime = useMaxStartTime(data);
 
     const onRowClicked = (row: VirtualizedRow) => {
         selectedRowRef.current = row;
 
-        if (hasStoppedRef.current && !selectedRowIdRef.current) {
+        if (!isStreamActive && !selectedRowIdRef.current) {
             return;
         }
 
         toast.closeAll();
-        stopStream();
 
-        if (isDataStreaming || isWaitingRef.current) {
+        if (isStreamActive) {
             selectedRowIdRef.current = row.id;
             toast({
                 title: 'Flows stream paused',
                 description: 'Close all rows to continue streaming flows.',
                 ...toastProps,
             });
-            stopStream();
+            pause();
         } else if (row.id === selectedRowIdRef.current) {
             selectedRowIdRef.current = null;
             selectedRowRef.current = null;
@@ -107,7 +100,7 @@ const FlowLogsPage: React.FC = () => {
                 description: 'Flows stream resumed.',
                 ...toastProps,
             });
-            startStream();
+            resume();
         } else {
             selectedRowIdRef.current = row.id;
         }
@@ -118,12 +111,13 @@ const FlowLogsPage: React.FC = () => {
         selectedRowIdRef.current = null;
     };
 
-    // close virtualized row when data changes
+    // close the expanded row when a flush lands new data; the stream
+    // publishes a new array identity on every change
     React.useEffect(() => {
         selectedRowRef.current?.closeVirtualizedRow();
         selectedRowIdRef.current = null;
         selectedRowRef.current = null;
-    }, [data.length]);
+    }, [data]);
 
     return (
         <Box pt={1}>
@@ -152,8 +146,15 @@ const FlowLogsPage: React.FC = () => {
                         startTime={startTime}
                     />
                 </Flex>
-                <Flex>
-                    {isWaiting && (
+                <Flex gap={4} alignItems='center'>
+                    {droppedCount > 0 && (
+                        <Text fontSize='sm' color='tigeraGrey.600'>
+                            Showing the most recent{' '}
+                            {data.length.toLocaleString()} flows
+                        </Text>
+                    )}
+
+                    {status === 'waiting' && (
                         <Flex gap={2} alignItems='center'>
                             <Pulse size='10px' />
                             <Text fontSize='sm' fontWeight='medium'>
@@ -162,14 +163,23 @@ const FlowLogsPage: React.FC = () => {
                         </Flex>
                     )}
 
-                    {(hasStoppedStreaming || error) && (
+                    {status === 'reconnecting' && (
+                        <Flex gap={2} alignItems='center'>
+                            <Pulse size='10px' />
+                            <Text fontSize='sm' fontWeight='medium'>
+                                Reconnecting
+                            </Text>
+                        </Flex>
+                    )}
+
+                    {(status === 'paused' || status === 'error') && (
                         <Button
                             variant='ghost'
                             onClick={() => {
                                 selectedRowRef.current?.closeVirtualizedRow();
                                 selectedRowIdRef.current = null;
                                 selectedRowRef.current = null;
-                                startStream();
+                                resume();
                             }}
                             leftIcon={<PlayIcon fill='tigeraGoldMedium' />}
                             sx={streamButtonStyles}
@@ -177,10 +187,10 @@ const FlowLogsPage: React.FC = () => {
                             Play
                         </Button>
                     )}
-                    {isDataStreaming && (
+                    {isStreamActive && (
                         <Button
                             variant='ghost'
-                            onClick={stopStream}
+                            onClick={pause}
                             leftIcon={<PauseIcon fill='tigeraGoldMedium' />}
                             sx={streamButtonStyles}
                         >

@@ -1,6 +1,5 @@
 import { objToQueryStr } from '@/libs/tigera/ui-components/utils';
 import { FlowLog as ApiFlowLog } from '@/types/api';
-import { FlowLog } from '@/types/render';
 import { v4 as uuid } from 'uuid';
 import { VisibleColumns } from '../components/FlowLogsList';
 import { ColumnName } from '../components/FlowLogsList/flowLogsTable';
@@ -104,19 +103,6 @@ export const getV2Columns = (
 };
 
 export const transformStartTime = (startTime: number) => startTime * -60;
-
-export const updateFirstFlowStartTime = (
-    data: FlowLog[],
-    filterFlowStartTime: number | null,
-    setFirstFlowStartTime: (startTime: number | null) => void,
-) => {
-    if (filterFlowStartTime === null && data.length > 0) {
-        const sorted = data.toSorted(
-            (a, b) => b.start_time.getTime() - a.start_time.getTime(),
-        );
-        setFirstFlowStartTime(sorted[data.length - 1].start_time.getTime());
-    }
-};
 
 export const computeNextSort = (
     column: SortColumn,

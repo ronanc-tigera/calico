@@ -23,7 +23,10 @@ jest.mock(
     () => () => 'Mock FlowLogsList',
 );
 
-jest.mock('@/api', () => ({ useStream: jest.fn() }));
+jest.mock('@/api', () => ({
+    __esModule: true,
+    default: { get: jest.fn() },
+}));
 
 jest.mock('@/libs/tigera/ui-components/components/common/OmniFilter', () => ({
     ...jest.requireActual(
@@ -73,15 +76,13 @@ jest.mock(
 jest.mock('@/hooks', () => ({ useSelectedListOmniFilters: jest.fn() }));
 
 const useStreamStub = {
-    stopStream: jest.fn(),
-    startStream: jest.fn(),
+    pause: jest.fn(),
+    resume: jest.fn(),
     data: [],
     error: null,
-    isDataStreaming: false,
-    isWaiting: false,
-    hasStoppedStreaming: false,
-    isFetching: false,
+    status: 'paused' as const,
     totalItems: 0,
+    droppedCount: 0,
 };
 
 const omniFilterData = {
@@ -126,48 +127,88 @@ describe('FlowLogsPage', () => {
         });
     });
 
-    it('should click play and call startStream', () => {
-        const mockStartStream = jest.fn();
+    it('should click play and call resume', () => {
+        const mockResume = jest.fn();
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            startStream: mockStartStream,
-            hasStoppedStreaming: true,
-            totalItems: 0,
+            resume: mockResume,
+            status: 'paused',
         });
 
         render(<FlowLogsPage />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Play' }));
 
-        expect(mockStartStream).toHaveBeenCalled();
+        expect(mockResume).toHaveBeenCalled();
     });
 
-    it('should click pause and call stopStream', () => {
-        const mockStopStream = jest.fn();
+    it('should show play when the stream errors out', () => {
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            stopStream: mockStopStream,
-            isDataStreaming: true,
-            totalItems: 0,
+            status: 'error',
+            error: { failureCount: 3, message: 'disconnected' },
+        });
+
+        render(<FlowLogsPage />);
+
+        expect(
+            screen.getByRole('button', { name: 'Play' }),
+        ).toBeInTheDocument();
+    });
+
+    it('should click pause and call pause', () => {
+        const mockPause = jest.fn();
+        jest.mocked(useFlowLogsStream).mockReturnValue({
+            ...useStreamStub,
+            pause: mockPause,
+            status: 'streaming',
         });
 
         render(<FlowLogsPage />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
 
-        expect(mockStopStream).toHaveBeenCalled();
+        expect(mockPause).toHaveBeenCalled();
     });
 
     it('should show the waiting state', () => {
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isWaiting: true,
-            totalItems: 0,
+            status: 'waiting',
         });
 
         render(<FlowLogsPage />);
 
         expect(screen.getByText('Waiting for flows')).toBeInTheDocument();
+    });
+
+    it('should show the cap hint when older flows have been dropped', () => {
+        jest.mocked(useFlowLogsStream).mockReturnValue({
+            ...useStreamStub,
+            status: 'streaming',
+            data: [
+                { start_time: new Date(), end_time: new Date() },
+                { start_time: new Date(), end_time: new Date() },
+            ] as any,
+            droppedCount: 120,
+        });
+
+        render(<FlowLogsPage />);
+
+        expect(
+            screen.getByText('Showing the most recent 2 flows'),
+        ).toBeInTheDocument();
+    });
+
+    it('should show the reconnecting state', () => {
+        jest.mocked(useFlowLogsStream).mockReturnValue({
+            ...useStreamStub,
+            status: 'reconnecting',
+        });
+
+        render(<FlowLogsPage />);
+
+        expect(screen.getByText('Reconnecting')).toBeInTheDocument();
     });
 
     it('should test <OmniFilters /> clears filter params', () => {
@@ -240,8 +281,7 @@ describe('FlowLogsPage', () => {
     it('should show a toast message when opening a row', () => {
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isDataStreaming: true,
-            totalItems: 0,
+            status: 'streaming',
         });
         render(<FlowLogsPage />);
 
@@ -254,8 +294,7 @@ describe('FlowLogsPage', () => {
         const id = '1234';
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isDataStreaming: true,
-            totalItems: 0,
+            status: 'streaming',
         });
         const { rerender } = render(<FlowLogsPage />);
 
@@ -263,8 +302,7 @@ describe('FlowLogsPage', () => {
 
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isDataStreaming: false,
-            totalItems: 0,
+            status: 'paused',
         });
 
         rerender(<FlowLogsPage />);
@@ -278,8 +316,7 @@ describe('FlowLogsPage', () => {
         const id = '1234';
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            hasStoppedStreaming: true,
-            totalItems: 0,
+            status: 'paused',
         });
         render(<FlowLogsPage />);
 
@@ -296,8 +333,7 @@ describe('FlowLogsPage', () => {
     it('should not show a toast message when opening another row', () => {
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isDataStreaming: false,
-            totalItems: 0,
+            status: 'paused',
         });
         render(<FlowLogsPage />);
 
@@ -312,8 +348,7 @@ describe('FlowLogsPage', () => {
         const closeVirtualizedRowMock = jest.fn();
         jest.mocked(useFlowLogsStream).mockReturnValue({
             ...useStreamStub,
-            isDataStreaming: true,
-            totalItems: 0,
+            status: 'streaming',
         });
         render(<FlowLogsPage />);
 

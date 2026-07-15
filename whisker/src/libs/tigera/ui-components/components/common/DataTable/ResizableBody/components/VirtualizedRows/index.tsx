@@ -48,8 +48,11 @@ const VirtualizedRows: React.FC<VirtualizedRowsProps> = ({
             itemCount={rows.length}
             itemSize={(i) => getSize(i, rows, rowHeight, expandoHeight)}
             width={'full'}
+            // Key by the sorted row at this index, not data[index]: rows
+            // are render-ordered while data is insertion-ordered, and the
+            // two diverge whenever the table is sorted.
             itemKey={(index, state: VirtualizedRowData) =>
-                state.data[index][keyProp]
+                state.rows[index].original[keyProp]
             }
             itemData={
                 {

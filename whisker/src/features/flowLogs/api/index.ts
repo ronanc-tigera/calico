@@ -1,10 +1,6 @@
-import api, { useStream } from '@/api';
-import { useDidUpdate } from '@/libs/tigera/ui-components/hooks';
-import {
-    ApiFilterResponse,
-    FlowLog as ApiFlowLog,
-    QueryPage,
-} from '@/types/api';
+import api from '@/api';
+import { useSseStream } from '@/api/sseStream/useSseStream';
+import { ApiFilterResponse, QueryPage } from '@/types/api';
 import { FlowLog } from '@/types/render';
 import {
     FilterHintKey,
@@ -17,13 +13,8 @@ import {
 } from '@/utils/omniFilter';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import React from 'react';
-import {
-    buildStreamPath,
-    getTimeInSeconds,
-    transformFlowLogsResponse,
-    transformStartTime,
-    updateFirstFlowStartTime,
-} from '../utils';
+import { connectToFlowStream, flowStreamPolicy, parseFlowLog } from '../stream';
+import { getTimeInSeconds, transformStartTime } from '../utils';
 const getFlowLogs = (queryParams?: Record<string, string>) =>
     api.get<FlowLog[]>('flows', {
         queryParams,
@@ -83,77 +74,68 @@ export const useFlowLogsStream = (
     startTime: number,
     filterHintValues: SelectedOmniFilterValues,
 ) => {
-    const firstFlowStartTime = React.useRef<number | null>(null);
-    const restartTime = React.useRef<number | null>(null);
-    const streamGeneration = React.useRef(0);
     const filters = transformToFlowsFilterQuery(filterHintValues);
     const startTimeGte = transformStartTime(startTime);
-    const path = buildStreamPath(startTimeGte, filters);
-    const resetStreamState = React.useCallback(() => {
-        streamGeneration.current += 1;
-    }, []);
 
-    const { startStream, data, totalItems, ...rest } = useStream<
-        ApiFlowLog,
-        FlowLog
-    >({
-        path,
-        transformResponse: transformFlowLogsResponse,
+    const { stream, snapshot } = useSseStream<FlowLog>({
+        parse: parseFlowLog,
+        policy: flowStreamPolicy,
     });
 
-    // First flow start time is needed for accurate filtering
+    // The oldest flow seen for the current window. Pins the window across
+    // filter changes so a filter edit re-queries the same time range
+    // instead of a fresh relative window.
+    const windowAnchor = React.useRef<number | null>(null);
+    const previousQuery = React.useRef<{
+        filters: string;
+        startTimeGte: number;
+    } | null>(null);
+
+    const { items } = snapshot;
     React.useEffect(() => {
-        const generation = streamGeneration.current;
-        updateFirstFlowStartTime(
-            data,
-            firstFlowStartTime.current,
-            (startTime) => {
-                if (streamGeneration.current === generation) {
-                    firstFlowStartTime.current = startTime;
-                }
-            },
-        );
-
-        if (data.length > 0) {
-            restartTime.current = data[0].end_time.getTime();
+        if (windowAnchor.current === null && items.length > 0) {
+            // Items are newest-first; the last one is the oldest.
+            windowAnchor.current = items[items.length - 1].start_time.getTime();
         }
-    }, [totalItems]);
+    }, [items]);
 
-    const updateStream = React.useCallback(
-        (path: string) => {
-            startStream({
-                path,
-                isUpdate: true,
-            });
-        },
-        [startStream],
-    );
+    // Every query→stream transition lives here.
+    React.useEffect(() => {
+        const previous = previousQuery.current;
+        previousQuery.current = { filters, startTimeGte };
 
-    useDidUpdate(() => {
-        resetStreamState();
-        const path = buildStreamPath(
-            getTimeInSeconds(firstFlowStartTime.current),
-            filters,
-        );
-        updateStream(path);
-    }, [filters, updateStream, resetStreamState]);
+        if (previous === null) {
+            stream.start(connectToFlowStream({ filters, startTimeGte }));
+        } else if (previous.startTimeGte !== startTimeGte) {
+            // A new start-time selection is a new window: drop the anchor.
+            windowAnchor.current = null;
+            stream.start(connectToFlowStream({ filters, startTimeGte }));
+        } else if (previous.filters !== filters) {
+            // Keep the window pinned to the anchor; before any flow has
+            // arrived, fall back to the selected relative window.
+            stream.start(
+                connectToFlowStream({
+                    filters,
+                    startTimeGte:
+                        windowAnchor.current !== null
+                            ? getTimeInSeconds(windowAnchor.current)
+                            : startTimeGte,
+                }),
+            );
+        } else {
+            // Unchanged query re-run: StrictMode's dev unmount/remount
+            // cycle destroyed the stream; revive it from the bookmark.
+            stream.resume();
+        }
+    }, [filters, startTimeGte, stream]);
 
-    useDidUpdate(() => {
-        resetStreamState();
-        // set first flow start time to null when the start time filter changes. It will be set to the first flow start time when the stream starts again.
-        firstFlowStartTime.current = null;
-        updateStream(buildStreamPath(startTimeGte, filters));
-    }, [startTime, updateStream, resetStreamState]);
-
-    const start = () => {
-        resetStreamState();
-        const path = buildStreamPath(
-            getTimeInSeconds(restartTime.current),
-            filters,
-        );
-
-        startStream({ path });
+    return {
+        data: snapshot.items,
+        status: snapshot.status,
+        error: snapshot.error,
+        totalItems: snapshot.totalReceived,
+        droppedCount: snapshot.droppedCount,
+        pause: stream.pause,
+        resume: stream.resume,
     };
-
-    return { startStream: start, data, totalItems, ...rest };
 };

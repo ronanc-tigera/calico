@@ -56,6 +56,46 @@ describe('useMaxStartTime', () => {
             flowLogs[0].start_time.getTime(),
         );
     });
+
+    it('should not move backwards when an older flow reaches the front', () => {
+        const newerFlow = {
+            id: '2',
+            start_time: new Date(100),
+        } as FlowLog;
+
+        const { rerender, result } = renderHook(
+            ({ flowLogs }) => useMaxStartTime(flowLogs),
+            { initialProps: { flowLogs: [newerFlow] } },
+        );
+
+        expect(result.current.current).toEqual(100);
+
+        rerender({ flowLogs: [flowLog, newerFlow] });
+
+        expect(result.current.current).toEqual(100);
+    });
+
+    it('should update when contents change but length does not', () => {
+        // Once the stream's buffer cap is hit, the list length is constant
+        // while contents keep changing.
+        const { rerender, result } = renderHook(
+            ({ flowLogs }) => useMaxStartTime(flowLogs),
+            { initialProps: { flowLogs } },
+        );
+
+        expect(result.current.current).toEqual(
+            flowLogs[0].start_time.getTime(),
+        );
+
+        const newerFlow = {
+            id: '2',
+            start_time: new Date(100),
+        } as FlowLog;
+
+        rerender({ flowLogs: [newerFlow] });
+
+        expect(result.current.current).toEqual(100);
+    });
 });
 
 describe('useShouldAnimate', () => {

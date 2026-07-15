@@ -82,7 +82,12 @@ describe('FlowLogsList', () => {
     });
 
     it('should render an error message', () => {
-        render(<FlowLogsList error={{ data: {} }} {...defaultProps} />);
+        render(
+            <FlowLogsList
+                error={{ failureCount: 3, message: 'disconnected' }}
+                {...defaultProps}
+            />,
+        );
 
         expect(
             screen.getByText('Could not display any flow logs at this time'),

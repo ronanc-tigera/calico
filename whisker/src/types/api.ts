@@ -71,28 +71,6 @@ export type ApiFilterResponse = {
     };
 };
 
-export type StartStreamOptions = {
-    path?: string;
-    isUpdate?: boolean;
-};
-
-export type UseStreamResult<T> = {
-    data: T[];
-    error: ApiError | null;
-    startStream: (options?: StartStreamOptions) => void;
-    stopStream: () => void;
-    isWaiting: boolean;
-    isDataStreaming: boolean;
-    hasStoppedStreaming: boolean;
-    isFetching: boolean;
-    totalItems: number;
-};
-
-export type UseStreamOptions<S, R> = {
-    path: string;
-    transformResponse: (stream: S) => R | null;
-};
-
 export type FlowsFilterQuery = {
     value: string | number;
     type: 'Exact' | 'Fuzzy';

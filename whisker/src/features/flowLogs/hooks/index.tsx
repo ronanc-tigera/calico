@@ -37,11 +37,14 @@ export const useFlowLogSort = () => {
 export const useMaxStartTime = (flowLogs: FlowLog[]) => {
     const max = React.useRef(0);
 
+    // Keyed on array identity, not length: once the stream buffer cap is
+    // reached, length stays constant while the contents keep changing.
     React.useEffect(() => {
-        if (flowLogs[0]?.start_time.getTime() ?? 0 > max.current) {
-            max.current = flowLogs?.[0]?.start_time.getTime();
+        const latest = flowLogs[0]?.start_time.getTime() ?? 0;
+        if (latest > max.current) {
+            max.current = latest;
         }
-    }, [flowLogs.length]);
+    }, [flowLogs]);
 
     return max;
 };
