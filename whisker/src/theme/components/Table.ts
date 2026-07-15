@@ -5,49 +5,56 @@ const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
     tableAnatomy.keys,
 );
 
+// const defaultStyles = {
+//     table: {
+//         bg: 'r',
+//         border: '0px solid',
+//     },
+//     th: {
+//         bg: 'experimental-token-bg-table-header',
+//         borderTopColor: 'experimental-token-border-default',
+//         borderBottomColor: 'experimental-token-border-default',
+//         borderLeftColor: 'experimental-token-border-default',
+//         borderLeft: 0,
+//         paddingLeft: '8px',
+//         borderTop: 0,
+//         borderRightColor: 'experimental-token-border-default',
+//         fontSize: 'sm',
+//         fontWeight: '700',
+//         letterSpacing: 'normal',
+//         px: 2,
+//         py: 2,
+//         _last: {
+//             borderRight: 0,
+//         },
+//         _first: {
+//             paddingLeft: 4,
+//         },
+//     },
+//     tr: {
+//         borderTop: 'none',
+//     },
+//     td: {
+//         fontWeight: '500',
+//         px: 2,
+//         py: 2,
+//         whiteSpace: 'nowrap',
+//         overflow: 'hidden',
+//         textOverflow: 'ellipsis',
+//         borderBottom: '1px solid!important',
+//         borderBottomColor: 'experimental-token-border-default!important',
+//         fontSize: 'sm',
+//         _first: {
+//             paddingLeft: 4,
+//         },
+//     },
+// };
+
 const defaultStyles = {
-    table: {
-        bg: 'experimental-token-bg-table-body',
-        border: '0px solid',
-    },
-    th: {
-        bg: 'experimental-token-bg-table-header',
-        borderTopColor: 'experimental-token-border-default',
-        borderBottomColor: 'experimental-token-border-default',
-        borderLeftColor: 'experimental-token-border-default',
-        borderLeft: 0,
-        paddingLeft: '8px',
-        borderTop: 0,
-        borderRightColor: 'experimental-token-border-default',
-        fontSize: 'sm',
-        fontWeight: '700',
-        letterSpacing: 'normal',
-        px: 2,
-        py: 2,
-        _last: {
-            borderRight: 0,
-        },
-        _first: {
-            paddingLeft: 4,
-        },
-    },
-    tr: {
-        borderTop: 'none',
-    },
-    td: {
-        fontWeight: '500',
-        px: 2,
-        py: 2,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        borderBottom: '1px solid!important',
-        borderBottomColor: 'experimental-token-border-default!important',
-        fontSize: 'sm',
-        _first: {
-            paddingLeft: 4,
-        },
-    },
+    table: {},
+    th: {},
+    tr: {},
+    td: {},
 };
 
 const smallStyles = {
@@ -69,20 +76,59 @@ const smallStyles = {
 
 export default defineMultiStyleConfig({
     baseStyle: {
-        table: {
-            bg: 'yellow', // TODO: FIX THIS BEFORE MERGING
-        },
+        // table: {
+        //     bg: 'yellow', // TODO: FIX THIS BEFORE MERGING
+        // },
+        // th: {
+        //     borderColor: 'experimental-token-border-default',
+        //     borderBottom: '1px',
+        //     textTransform: 'capitalize',
+        // },
+        // tr: {
+        //     _last: {
+        //         td: {
+        //             borderBottom: 0,
+        //         },
+        //     },
+        // },
+        table: {},
         th: {
             borderColor: 'experimental-token-border-default',
-            borderBottom: '1px',
+            borderBottomWidth: '2px',
+            borderBottomStyle: 'solid',
             textTransform: 'capitalize',
+
+            bg: 'experimental-token-bg-table-header',
+            //         borderTopColor: 'experimental-token-border-default',
+            //         borderBottomColor: 'experimental-token-border-default',
+            //         borderLeftColor: 'experimental-token-border-default',
+            //         borderLeft: 0,
+            //         paddingLeft: '8px',
+            //         borderTop: 0,
+            //         borderRightColor: 'experimental-token-border-default',
+            fontSize: 'sm',
+            fontWeight: 'bold',
+            letterSpacing: 'normal',
+            p: '2!important',
         },
         tr: {
+            // borderTop: 'none',
+            p: 0,
+            borderBottom: '1px solid',
+            borderBottomColor: 'experimental-token-border-default',
             _last: {
-                td: {
-                    borderBottom: 0,
-                },
+                borderBottom: 'none!',
             },
+        },
+        td: {
+            p: '2!important',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            borderBottom: '1px solid!important',
+            borderBottomColor: 'experimental-token-border-default!important',
+            fontSize: 'sm',
+            border: 'none!important',
         },
     },
     sizes: {
@@ -91,6 +137,7 @@ export default defineMultiStyleConfig({
         lg: defaultStyles, //could do with updting if required at some point
     },
     variants: {
+        tanstack: {},
         surface: {
             table: {
                 bg: 'experimental-token-elevation-surface',
