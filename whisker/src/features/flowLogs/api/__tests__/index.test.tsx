@@ -4,11 +4,7 @@ import {
     renderHookWithQueryClient,
     waitFor,
 } from '@/test-utils/helper';
-import {
-    FilterHintTypes,
-    ListOmniFilterKeys,
-    transformToFlowsFilterQuery,
-} from '@/utils/omniFilter';
+import { toFlowLogFilterQuery } from '@/utils/filters/flowsFilter';
 import {
     useDeniedFlowLogsCount,
     useFlowLogs,
@@ -24,9 +20,9 @@ jest.mock('@/api', () => ({
     useStream: jest.fn(),
 }));
 
-jest.mock('@/utils/omniFilter', () => ({
-    ...jest.requireActual('@/utils/omniFilter'),
-    transformToFlowsFilterQuery: jest.fn(),
+jest.mock('@/utils/filters/flowsFilter', () => ({
+    ...jest.requireActual('@/utils/filters/flowsFilter'),
+    toFlowLogFilterQuery: jest.fn(),
 }));
 
 describe('useFlowLogs', () => {
@@ -66,16 +62,13 @@ describe('useInfiniteFilterQuery', () => {
         });
 
         const { result } = renderHookWithQueryClient(() =>
-            useInfiniteFilterQuery(
-                ListOmniFilterKeys.source_namespace,
-                filterString,
-            ),
+            useInfiniteFilterQuery('source_namespace', filterString),
         );
 
         expect(api.get).toHaveBeenCalledWith('flows-filter-hints', {
             queryParams: {
                 filters: filterString,
-                type: FilterHintTypes.source_namespace,
+                type: 'SourceNamespace',
                 pageSize: 20,
                 page: 0,
             },
@@ -96,7 +89,7 @@ describe('useInfiniteFilterQuery', () => {
         );
     });
 
-    it('should fall back to the default page size and omit filters for a null query', async () => {
+    it('should omit filters for a null query and not fetch until asked', async () => {
         jest.mocked(api.get).mockClear();
         jest.mocked(api.get).mockResolvedValue({
             items: [],
@@ -106,7 +99,7 @@ describe('useInfiniteFilterQuery', () => {
         });
 
         const { result } = renderHookWithQueryClient(() =>
-            useInfiniteFilterQuery(ListOmniFilterKeys.reporter, null),
+            useInfiniteFilterQuery('policyKind', null),
         );
 
         // the query is disabled while there is no query string
@@ -114,12 +107,11 @@ describe('useInfiniteFilterQuery', () => {
 
         (result.current as any).refetch();
 
-        // reporter has no limit configured and a null query sends no filters
         await waitFor(() =>
             expect(api.get).toHaveBeenCalledWith('flows-filter-hints', {
                 queryParams: {
-                    type: FilterHintTypes.reporter,
-                    pageSize: 1,
+                    type: 'PolicyKind',
+                    pageSize: 20,
                     page: 0,
                 },
             }),
@@ -137,7 +129,7 @@ describe('useFlowLogsStream', () => {
             startStream: startStreamMock,
             data: [{ start_time: startTime, end_time: endTime }],
         } as any);
-        jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
+        jest.mocked(toFlowLogFilterQuery).mockReturnValue('');
 
         const { rerender } = renderHook(
             ({ params }) => useFlowLogsStream(15, params),
@@ -149,7 +141,7 @@ describe('useFlowLogsStream', () => {
         );
 
         const updatedFilters = { source_name: ['foo'] } as any;
-        jest.mocked(transformToFlowsFilterQuery).mockReturnValue('fake-query');
+        jest.mocked(toFlowLogFilterQuery).mockReturnValue('fake-query');
         rerender(updatedFilters);
 
         expect(startStreamMock).toHaveBeenCalledWith({
@@ -164,7 +156,7 @@ describe('useFlowLogsStream', () => {
             startStream: startStreamMock,
             data: [{ start_time: startTime, end_time: endTime }],
         } as any);
-        jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
+        jest.mocked(toFlowLogFilterQuery).mockReturnValue('');
 
         const { result } = renderHook(() => useFlowLogsStream(15, {}));
 
@@ -181,7 +173,7 @@ describe('useFlowLogsStream', () => {
             startStream: startStreamMock,
             data: [{ start_time: startTime, end_time: endTime }],
         } as any);
-        jest.mocked(transformToFlowsFilterQuery).mockReturnValue('');
+        jest.mocked(toFlowLogFilterQuery).mockReturnValue('');
 
         const { rerender } = renderHook(
             ({ startTime, filters }) => useFlowLogsStream(startTime, filters),
