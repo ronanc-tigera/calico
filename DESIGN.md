@@ -66,7 +66,6 @@ Components with their own design doc:
 | Goldmane | [`goldmane/DESIGN.md`](goldmane/DESIGN.md) |
 | Typha | [`typha/DESIGN.md`](typha/DESIGN.md) |
 | Node container | [`node/DESIGN.md`](node/DESIGN.md) |
-| Whisker | [`whisker/DESIGN.md`](whisker/DESIGN.md) |
 
 Components without a `DESIGN.md` inherit constraints from the
 code and from this top-level overview. Adding a `DESIGN.md` when
